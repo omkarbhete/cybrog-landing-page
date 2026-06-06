@@ -1,0 +1,390 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Orbitron:wght@400;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--void:#000000;--cyan:#00E5FF;--aurora:#38BDF8;--purple:#7C3AED;--white:#ffffff}
+body{background:#000;font-family:'Space Grotesk',sans-serif;color:#fff;overflow-x:hidden;cursor:none}
+
+#orb{position:fixed;width:24px;height:24px;border-radius:50%;background:rgba(0,229,255,0.9);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:screen;box-shadow:0 0 15px rgba(0,229,255,0.6)}
+#orb-ring{position:fixed;width:44px;height:44px;border-radius:50%;border:1px solid rgba(0,229,255,0.3);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .08s,top .08s}
+
+canvas#cosmos{position:fixed;inset:0;z-index:0}
+
+#phase1{position:fixed;inset:0;z-index:500;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;transition:opacity 1.5s}
+#phase1.gone{opacity:0;pointer-events:none}
+.sig-text{font-family:'Space Grotesk',sans-serif;font-size:clamp(14px,2vw,20px);color:rgba(0,229,255,0);letter-spacing:8px;font-weight:300;margin:12px 0;transition:color 1s}
+.sig-text.on{color:rgba(0,229,255,0.7)}
+.sig-text.bright{color:#00E5FF;font-size:clamp(28px,5vw,64px);font-weight:700;letter-spacing:4px;font-family:'Orbitron',monospace}
+
+.page{position:relative;z-index:2;min-height:100vh}
+
+section.phase{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 40px;text-align:center;position:relative}
+
+.transmission-frame{border:1px solid rgba(0,229,255,0.12);padding:60px;max-width:800px;position:relative;background:rgba(0,0,0,0.6);backdrop-filter:blur(20px)}
+.transmission-frame::before{content:'NEXUS Ω // TRANSMISSION 2050→2024';position:absolute;top:-1px;left:50%;transform:translateX(-50%);font-family:'Orbitron',monospace;font-size:10px;color:rgba(0,229,255,0.5);letter-spacing:4px;background:#000;padding:0 16px;white-space:nowrap}
+.transmission-frame::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,0.4),rgba(124,58,237,0.4),transparent)}
+
+.eyebrow{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:6px;color:rgba(0,229,255,0.5);margin-bottom:20px}
+h1.mega{font-family:'Orbitron',monospace;font-size:clamp(40px,8vw,100px);font-weight:900;line-height:0.9;letter-spacing:-2px;margin-bottom:24px}
+h1.mega .line1{display:block;color:#fff}
+h1.mega .line2{display:block;color:transparent;-webkit-text-stroke:1px rgba(0,229,255,0.6)}
+.hero-sub{font-size:clamp(14px,1.8vw,18px);color:rgba(255,255,255,0.4);line-height:1.8;max-width:560px;font-weight:300;letter-spacing:.5px;margin:0 auto 40px}
+
+.reveal-btn{font-family:'Orbitron',monospace;font-size:12px;letter-spacing:4px;padding:18px 48px;background:transparent;border:1px solid rgba(0,229,255,0.4);color:rgba(0,229,255,0.8);cursor:none;position:relative;overflow:hidden;transition:all .4s}
+.reveal-btn::before{content:'';position:absolute;inset:0;background:rgba(0,229,255,0.05);transform:scaleX(0);transform-origin:left;transition:transform .4s}
+.reveal-btn:hover::before{transform:scaleX(1)}
+.reveal-btn:hover{color:#00E5FF;border-color:rgba(0,229,255,0.9)}
+
+.signal-bar{width:100%;height:1px;background:rgba(0,229,255,0.05);margin:60px 0;position:relative;overflow:hidden}
+.signal-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,229,255,0.6),transparent);animation:signal-sweep 3s linear infinite}
+@keyframes signal-sweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}
+
+}
+
+.timeline-3d{display:grid;gap:0;margin:60px 0;width:100%;max-width:900px}
+.tl-node{display:grid;grid-template-columns:1fr 60px 1fr;align-items:start;margin-bottom:0}
+.tl-left{text-align:right;padding:0 30px 40px 0}
+.tl-right{text-align:left;padding:0 0 40px 30px}
+.tl-center{display:flex;flex-direction:column;align-items:center}
+.tl-gem{width:16px;height:16px;background:#000;border:2px solid rgba(0,229,255,0.6);transform:rotate(45deg);transition:all .4s;position:relative;z-index:1;margin-top:4px}
+.tl-gem.active{background:rgba(0,229,255,0.2);border-color:#00E5FF;box-shadow:0 0 20px rgba(0,229,255,0.4)}
+.tl-spine{flex:1;width:1px;background:rgba(0,229,255,0.1)}
+.tl-year{font-family:'Orbitron',monospace;font-size:11px;color:rgba(0,229,255,0.4);letter-spacing:3px;margin-bottom:6px}
+.tl-title{font-size:16px;font-weight:500;color:#fff;margin-bottom:6px}
+.tl-desc{font-size:13px;color:rgba(255,255,255,0.35);line-height:1.7;font-weight:300}
+
+.orb-section{position:relative;padding:140px 40px;text-align:center}
+#energy-orb{width:280px;height:280px;border-radius:50%;margin:0 auto 60px;position:relative;cursor:none}
+#orb-canvas{width:280px;height:280px;border-radius:50%}
+
+.pillar-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.06);max-width:900px;margin:0 auto}
+.pillar{background:#000;padding:40px 32px;position:relative;overflow:hidden;transition:background .4s}
+.pillar::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--aurora),var(--purple));transform:scaleX(0);transform-origin:left;transition:transform .5s}
+.pillar:hover{background:rgba(0,229,255,0.02)}
+.pillar:hover::before{transform:scaleX(1)}
+.pillar-num{font-family:'Orbitron',monospace;font-size:11px;color:rgba(0,229,255,0.3);letter-spacing:4px;margin-bottom:16px}
+.pillar-title{font-size:20px;font-weight:500;color:#fff;margin-bottom:10px;line-height:1.2}
+.pillar-body{font-size:13px;color:rgba(255,255,255,0.35);line-height:1.8;font-weight:300}
+
+.portal-section{position:relative;overflow:hidden;padding:140px 40px;text-align:center}
+#portal-canvas{position:absolute;inset:0;width:100%;height:100%}
+.portal-content{position:relative;z-index:2}
+
+.decision-section{min-height:80vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:100px 40px;text-align:center;position:relative}
+.decision-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(124,58,237,0.08) 0%,transparent 60%)}
+h2.decision{font-family:'Space Grotesk',sans-serif;font-size:clamp(20px,3vw,36px);font-weight:300;color:rgba(255,255,255,0.5);line-height:1.8;margin-bottom:16px;letter-spacing:2px}
+h2.decision em{font-style:normal;color:#fff;font-weight:700}
+.big-cta{display:inline-block;font-family:'Orbitron',monospace;font-size:clamp(11px,1.5vw,13px);letter-spacing:5px;padding:22px 56px;margin-top:40px;border:1px solid rgba(0,229,255,0.5);color:#00E5FF;cursor:none;position:relative;overflow:hidden;transition:all .5s}
+.big-cta-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,229,255,0.08),rgba(124,58,237,0.08));transform:translateY(101%);transition:transform .5s}
+.big-cta:hover .big-cta-bg{transform:translateY(0)}
+.big-cta:hover{border-color:#00E5FF}
+.nexus-footer{border-top:1px solid rgba(255,255,255,0.04);padding:40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.f-logo{font-family:'Orbitron',monospace;font-size:16px;color:rgba(0,229,255,0.3);letter-spacing:6px}
+.f-note{font-size:11px;color:rgba(255,255,255,0.15);letter-spacing:3px;font-family:'Orbitron',monospace}
+
+@keyframes orbit-pulse{0%,100%{opacity:0.4;transform:scale(1)}50%{opacity:0.8;transform:scale(1.02)}}
+.orbit-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,229,255,0.08);animation:orbit-pulse 4s ease-in-out infinite;top:50%;left:50%;transform:translate(-50%,-50%)}
+
+h2.section-head{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,5vw,64px);font-weight:700;color:#fff;margin-bottom:16px;line-height:1.1}
+h2.section-head em{font-style:normal;color:#00E5FF}
+.section-sub{font-size:15px;color:rgba(255,255,255,0.35);max-width:520px;margin:0 auto 60px;line-height:1.8;font-weight:300}
+.h-rule{width:60px;height:1px;background:rgba(0,229,255,0.3);margin:20px auto}
+
+.fade-in{opacity:0;transform:translateY(40px);transition:opacity .8s,transform .8s}
+.fade-in.vis{opacity:1;transform:translateY(0)}
+</style>
+
+<div id="orb"></div>
+<div id="orb-ring"></div>
+<canvas id="cosmos"></canvas>
+
+<div id="phase1">
+  <div class="sig-text" id="s1">signal detected...</div>
+  <div class="sig-text" id="s2">searching for future innovators...</div>
+  <div class="sig-text" id="s3">candidate found.</div>
+  <div class="sig-text bright" id="s4">NEXUS Ω</div>
+</div>
+
+<div class="page">
+
+  <section class="phase">
+    <div class="orbit-ring" style="width:600px;height:600px;animation-delay:0s"></div>
+    <div class="orbit-ring" style="width:900px;height:900px;animation-delay:1.5s"></div>
+    <div class="transmission-frame fade-in">
+      <div class="eyebrow">INCOMING TRANSMISSION // 2050.03.14 // IITB INNOVATION HUB</div>
+      <h1 class="mega">
+        <span class="line1">THE FUTURE</span>
+        <span class="line2">IS NOT PREDICTED</span>
+      </h1>
+      <p class="hero-sub">A transmission arrived from 2050. The future innovators of IIT Bombay found a way to reach back. They chose you. The question is — will you answer?</p>
+      <button class="reveal-btn" onclick="unlockUniverse()">ACCEPT THE TRANSMISSION</button>
+    </div>
+  </section>
+
+  <div class="signal-bar"></div>
+
+  <section class="phase fade-in" style="padding:80px 40px">
+    <div class="eyebrow">CHAPTER I — TEMPORAL COORDINATES</div>
+    <h2 class="section-head">THE <em>TIMELINE</em><br>OF INNOVATION</h2>
+    <div class="h-rule"></div>
+    <p class="section-sub">Every breakthrough in human history was once called impossible. These are the nodes where the future diverged from everything we assumed was fixed.</p>
+    <div class="timeline-3d">
+      <div class="tl-node">
+        <div class="tl-left">
+          <div class="tl-year">2024</div>
+          <div class="tl-title">The Threshold</div>
+          <div class="tl-desc">Artificial general intelligence emerges. The tools to reshape civilization exist. Only architects remain missing.</div>
+        </div>
+        <div class="tl-center"><div class="tl-gem active"></div><div class="tl-spine"></div></div>
+        <div class="tl-right"></div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-left"></div>
+        <div class="tl-center"><div class="tl-gem"></div><div class="tl-spine"></div></div>
+        <div class="tl-right">
+          <div class="tl-year">2028</div>
+          <div class="tl-title">Neural Infrastructure</div>
+          <div class="tl-desc">Brain-computer symbiosis becomes normalized. The cognitive ceiling dissolves. Thought and code merge.</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-left">
+          <div class="tl-year">2035</div>
+          <div class="tl-title">Post-Scarcity Protocol</div>
+          <div class="tl-desc">Abundance engineering solves food, energy, and disease simultaneously. India leads the redesign of civilization.</div>
+        </div>
+        <div class="tl-center"><div class="tl-gem"></div><div class="tl-spine"></div></div>
+        <div class="tl-right"></div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-left"></div>
+        <div class="tl-center"><div class="tl-gem"></div><div class="tl-spine"></div></div>
+        <div class="tl-right">
+          <div class="tl-year">2050</div>
+          <div class="tl-title">Nexus Omega</div>
+          <div class="tl-desc">The point of convergence. All innovation threads arrive here. This transmission was sent from this exact moment.</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-left">
+          <div class="tl-year">YOU</div>
+          <div class="tl-title">The Missing Variable</div>
+          <div class="tl-desc">Every simulation of 2050 has one common element — a decision made now, by someone exactly like you.</div>
+        </div>
+        <div class="tl-center"><div class="tl-gem" style="border-color:rgba(124,58,237,0.8);background:rgba(124,58,237,0.15)"></div></div>
+        <div class="tl-right"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="signal-bar" style="transform:rotate(180deg)"></div>
+
+  <section class="orb-section fade-in">
+    <div class="eyebrow">CHAPTER II — INNOVATION CORE</div>
+    <h2 class="section-head" style="margin-bottom:8px">THE <em>ENERGY SPHERE</em></h2>
+    <p class="section-sub">Move your cursor across the orb. Every interaction reshapes it. No two visitors leave the same impression.</p>
+    <div id="energy-orb"><canvas id="orb-canvas" width="280" height="280"></canvas></div>
+    <div class="pillar-grid">
+      <div class="pillar">
+        <div class="pillar-num">01 // SYSTEMS</div>
+        <div class="pillar-title">Complex Systems Thinking</div>
+        <div class="pillar-body">Build tools that reshape how civilization organizes itself — not features, but new operating systems for human potential.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02 // COGNITION</div>
+        <div class="pillar-title">Augmented Intelligence</div>
+        <div class="pillar-body">The next frontier is not AI replacing humans but AI extending the ceiling of what a single determined mind can accomplish.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03 // SCALE</div>
+        <div class="pillar-title">Billion-Person Impact</div>
+        <div class="pillar-body">From Bombay to the world. IIT graduates don't just build companies — they reshape infrastructure that billions depend on daily.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">04 // VELOCITY</div>
+        <div class="pillar-title">Compounding Ambition</div>
+        <div class="pillar-body">The gap between idea and impact is collapsing. What took a generation now takes a semester — if the right mind is in the room.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="portal-section fade-in" style="min-height:600px">
+    <canvas id="portal-canvas"></canvas>
+    <div class="portal-content">
+      <div class="eyebrow">CHAPTER III — DIMENSIONAL GATEWAY</div>
+      <h2 class="section-head" style="max-width:700px;margin:0 auto 16px">THE PORTAL IS<br><em>OPEN</em></h2>
+      <p class="section-sub" style="margin-bottom:40px">The gap between where innovation stands today and what 2050 demands is not a distance. It is a decision.</p>
+      <button class="reveal-btn" onclick="triggerPortal(this)">STEP THROUGH</button>
+    </div>
+  </section>
+
+  <section class="decision-section fade-in">
+    <div class="eyebrow">CHAPTER IV — THE DECISION</div>
+    <div class="h-rule"></div>
+    <h2 class="decision">The future is not predicted.</h2>
+    <h2 class="decision"><em>It is built.</em></h2>
+    <h2 class="decision" style="margin-top:8px">The next innovator<br><em>is loading...</em></h2>
+    <div class="big-cta" id="final-cta">
+      <div class="big-cta-bg"></div>
+      <span style="position:relative;z-index:1">INITIATE THE NEXUS PROTOCOL</span>
+    </div>
+    <div id="transmission-id" style="margin-top:24px;font-family:'Orbitron',monospace;font-size:10px;color:rgba(0,229,255,0.3);letter-spacing:3px"></div>
+  </section>
+
+  <footer class="nexus-footer">
+    <div class="f-logo">NEXUS Ω</div>
+    <div class="f-note">IIT BOMBAY // CA SELECTION // TRANSMISSION FROM 2050</div>
+    <div class="f-note">ALL FUTURES NAVIGABLE</div>
+  </footer>
+
+</div>
+
+<script>
+const orb = document.getElementById('orb');
+const orbRing = document.getElementById('orb-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+function lerpOrb(){
+  rx += (mx - rx) * 0.1; ry += (my - ry) * 0.1;
+  orb.style.left = mx+'px'; orb.style.top = my+'px';
+  orbRing.style.left = rx+'px'; orbRing.style.top = ry+'px';
+  requestAnimationFrame(lerpOrb);
+}
+lerpOrb();
+
+const cosmos = document.getElementById('cosmos');
+const cctx = cosmos.getContext('2d');
+let CW, CH, stars = [], mx2 = 0, my2 = 0;
+function resizeCosmos(){ CW = cosmos.width = window.innerWidth; CH = cosmos.height = window.innerHeight; }
+resizeCosmos(); window.addEventListener('resize', resizeCosmos);
+for(let i = 0; i < 280; i++){
+  stars.push({ x: Math.random(), y: Math.random(), r: Math.random()*1.5+.3, s: Math.random()*.5+.1, ph: Math.random()*Math.PI*2, vx:(Math.random()-.5)*.0002, vy:(Math.random()-.5)*.0002 });
+}
+document.addEventListener('mousemove', e => { mx2 = (e.clientX/window.innerWidth-.5); my2 = (e.clientY/window.innerHeight-.5); });
+let t2 = 0;
+function drawCosmos(){
+  t2 += 0.008;
+  cctx.clearRect(0,0,CW,CH);
+  stars.forEach(s => {
+    s.x += s.vx + mx2*0.0003; s.y += s.vy + my2*0.0003;
+    if(s.x<0)s.x=1; if(s.x>1)s.x=0; if(s.y<0)s.y=1; if(s.y>1)s.y=0;
+    const bri = 0.2 + 0.5*Math.abs(Math.sin(t2*s.s + s.ph));
+    cctx.beginPath(); cctx.arc(s.x*CW, s.y*CH, s.r, 0, Math.PI*2);
+    cctx.fillStyle = `rgba(${s.r>1.2?'120,180,255':'180,220,255'},${bri})`; cctx.fill();
+  });
+  const grd = cctx.createRadialGradient(CW/2,CH,0,CW/2,CH/2,CW*0.7);
+  grd.addColorStop(0,'rgba(0,229,255,0.012)'); grd.addColorStop(1,'transparent');
+  cctx.fillStyle=grd; cctx.fillRect(0,0,CW,CH);
+  requestAnimationFrame(drawCosmos);
+}
+drawCosmos();
+
+const p1 = document.getElementById('phase1');
+const texts = ['s1','s2','s3'];
+let ti = 0;
+function bootSeq(){
+  if(ti < texts.length){ document.getElementById(texts[ti++]).classList.add('on'); setTimeout(bootSeq, ti===1?800:ti===2?1200:1000); }
+  else { setTimeout(() => { document.getElementById('s4').classList.add('on'); setTimeout(() => { p1.classList.add('gone'); setTimeout(()=>p1.remove(),1600); },1200); },800); }
+}
+setTimeout(bootSeq, 600);
+
+function unlockUniverse(){
+  const gems = document.querySelectorAll('.tl-gem');
+  gems.forEach((g,i) => setTimeout(() => g.classList.add('active'),i*200));
+}
+
+const orbC = document.getElementById('orb-canvas');
+const octx = orbC.getContext('2d');
+let orbMx = 140, orbMy = 140, orbPhase = 0;
+const orbEl = document.getElementById('energy-orb');
+orbEl.addEventListener('mousemove', e => {
+  const r = orbEl.getBoundingClientRect();
+  orbMx = e.clientX - r.left; orbMy = e.clientY - r.top;
+});
+function drawOrbCanvas(){
+  orbPhase += 0.025;
+  octx.clearRect(0,0,280,280);
+  const cx = 140, cy = 140, R = 100;
+  for(let layer = 0; layer < 3; layer++){
+    const lr = R - layer*20;
+    const dx = (orbMx - cx)*0.15*(1+layer*.3);
+    const dy = (orbMy - cy)*0.15*(1+layer*.3);
+    const grad = octx.createRadialGradient(cx+dx, cy+dy, 0, cx+dx, cy+dy, lr);
+    const a = [0.25,0.15,0.08][layer];
+    const colors = [['0,229,255','56,189,248'],['124,58,237','0,229,255'],['56,189,248','124,58,237']];
+    grad.addColorStop(0,`rgba(${colors[layer][0]},${a*2})`);
+    grad.addColorStop(0.5,`rgba(${colors[layer][1]},${a})`);
+    grad.addColorStop(1,'rgba(0,0,0,0)');
+    octx.beginPath(); octx.arc(cx+dx, cy+dy, lr, 0, Math.PI*2);
+    octx.fillStyle = grad; octx.fill();
+  }
+  for(let i = 0; i < 40; i++){
+    const angle = (i/40)*Math.PI*2 + orbPhase + (i%3)*0.5;
+    const rad = 70 + 25*Math.sin(orbPhase*2 + i*0.4);
+    const px = cx + rad*Math.cos(angle) + (orbMx-cx)*0.04;
+    const py = cy + rad*Math.sin(angle) + (orbMy-cy)*0.04;
+    const opa = 0.3 + 0.5*Math.abs(Math.sin(orbPhase + i*0.3));
+    octx.beginPath(); octx.arc(px, py, 1.5, 0, Math.PI*2);
+    octx.fillStyle = i%2===0?`rgba(0,229,255,${opa})`:`rgba(124,58,237,${opa})`; octx.fill();
+  }
+  octx.beginPath(); octx.arc(cx, cy, R, 0, Math.PI*2);
+  octx.strokeStyle='rgba(0,229,255,0.12)'; octx.lineWidth=1; octx.stroke();
+  requestAnimationFrame(drawOrbCanvas);
+}
+drawOrbCanvas();
+
+const portalC = document.getElementById('portal-canvas');
+const pctx = portalC.getContext('2d');
+let portalActive = false, portalPhase = 0, particles = [];
+function resizePortal(){
+  const sec = portalC.parentElement;
+  portalC.width = sec.offsetWidth; portalC.height = sec.offsetHeight;
+}
+resizePortal(); window.addEventListener('resize', resizePortal);
+function spawnParticles(){
+  for(let i = 0; i < 6; i++){
+    const angle = Math.random()*Math.PI*2;
+    const r = 80+Math.random()*60;
+    particles.push({ x:portalC.width/2+r*Math.cos(angle), y:portalC.height/2+r*Math.sin(angle), vx:(portalC.width/2-(portalC.width/2+r*Math.cos(angle)))*0.02, vy:(portalC.height/2-(portalC.height/2+r*Math.sin(angle)))*0.02, life:1 });
+  }
+}
+function drawPortal(){
+  portalPhase += 0.01;
+  pctx.clearRect(0,0,portalC.width,portalC.height);
+  const cx = portalC.width/2, cy = portalC.height/2;
+  for(let r = 180; r > 0; r -= 30){
+    const opa = 0.03 + 0.04*Math.abs(Math.sin(portalPhase + r*0.05));
+    pctx.beginPath(); pctx.arc(cx, cy, r, 0, Math.PI*2);
+    pctx.strokeStyle=`rgba(0,229,255,${opa})`; pctx.lineWidth=1; pctx.stroke();
+  }
+  if(portalActive){
+    spawnParticles();
+    for(let i = particles.length-1; i >= 0; i--){
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+      if(p.life <= 0){ particles.splice(i,1); continue; }
+      pctx.beginPath(); pctx.arc(p.x,p.y,1.5,0,Math.PI*2);
+      pctx.fillStyle=`rgba(0,229,255,${p.life*0.8})`; pctx.fill();
+    }
+    const dist = 60+40*Math.abs(Math.sin(portalPhase*3));
+    const grd = pctx.createRadialGradient(cx,cy,0,cx,cy,dist);
+    grd.addColorStop(0,'rgba(0,229,255,0.15)'); grd.addColorStop(0.5,'rgba(124,58,237,0.06)'); grd.addColorStop(1,'transparent');
+    pctx.fillStyle=grd; pctx.beginPath(); pctx.arc(cx,cy,dist,0,Math.PI*2); pctx.fill();
+  }
+  requestAnimationFrame(drawPortal);
+}
+drawPortal();
+function triggerPortal(btn){
+  portalActive = !portalActive;
+  btn.textContent = portalActive ? 'PORTAL ACTIVE' : 'STEP THROUGH';
+}
+
+const tid = document.getElementById('transmission-id');
+tid.textContent = 'TRANSMISSION-ID: NEXUS-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-2050-IITB';
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('vis'); });
+},{threshold:0.12});
+document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+document.getElementById('final-cta').addEventListener('click', () => sendPrompt('I want to join Project NEXUS Ω — what do I need to know about the IIT Bombay Campus Ambassador program?'));
+</script>
